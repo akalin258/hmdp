@@ -24,7 +24,9 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/blog/hot",
                         "/user/code",
                         "/user/login"
-                );
-        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate));
+                ).order(1);
+        //注意"/**"这才是拦截所有路径
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+                .addPathPatterns("/**").order(0);
     }
 }
