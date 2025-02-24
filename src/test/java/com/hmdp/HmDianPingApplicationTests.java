@@ -33,7 +33,7 @@ class HmDianPingApplicationTests {
     }
     @Test
     //店铺缓存预热
-    public void testSaveShop(){
+    public void testSaveShop() throws InterruptedException {
         shopService.saveShop2Redis(1L,10L);
     }
 }
