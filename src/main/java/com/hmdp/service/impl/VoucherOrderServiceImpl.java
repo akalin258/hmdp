@@ -51,6 +51,9 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (voucher.getStock() < 0) {
             return Result.fail("库存不足");
         }
+        //确保一人一单
+        //query().eq()
+        //TODO 这块还没弄完
         //3.2库存足够,扣减库存
         //....
         int rows = seckillVoucherMapper.reduceStock(voucherId);

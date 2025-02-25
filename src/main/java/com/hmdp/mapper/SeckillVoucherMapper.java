@@ -14,6 +14,6 @@ import org.apache.ibatis.annotations.Update;
  * @since 2022-01-04
  */
 public interface SeckillVoucherMapper extends BaseMapper<SeckillVoucher> {
-    @Update("update tb_seckill_voucher set stock=stock-1 where voucher_id=#{x}")
+    @Update("update tb_seckill_voucher set stock=stock-1 where voucher_id=#{x} and stock>0")
     int reduceStock(@Param("x") Long voucherId);
 }

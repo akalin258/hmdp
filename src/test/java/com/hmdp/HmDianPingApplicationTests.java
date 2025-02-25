@@ -7,9 +7,13 @@ import com.hmdp.utils.RegexUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @SpringBootTest
 class HmDianPingApplicationTests {
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     //注意,这里注入的是实现类
     @Autowired
@@ -35,5 +39,13 @@ class HmDianPingApplicationTests {
     //店铺缓存预热
     public void testSaveShop() throws InterruptedException {
         shopService.saveShop2Redis(1L,10L);
+    }
+    @Test
+    public void testRedisApi(){
+        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent("test setnx", "111");
+        System.out.println(flag);
+        //setIfAbsent,如果key不存在,添加k-v,返回true
+        //第一次试一个不存在的返回true
+        //再运行这个函数,返回false
     }
 }
