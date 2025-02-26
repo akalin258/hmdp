@@ -1,6 +1,7 @@
 package com.hmdp;
 
 import cn.hutool.core.util.StrUtil;
+import com.hmdp.mapper.BlogMapper;
 import com.hmdp.service.IShopService;
 import com.hmdp.service.impl.ShopServiceImpl;
 import com.hmdp.utils.RegexUtils;
@@ -18,6 +19,9 @@ class HmDianPingApplicationTests {
     //注意,这里注入的是实现类
     @Autowired
     private ShopServiceImpl shopService;
+
+    @Autowired
+    private BlogMapper blogMapper;
     @Test
     public void testPhone(){
         System.out.println(RegexUtils.isPhoneInvalid("111"));
@@ -47,5 +51,12 @@ class HmDianPingApplicationTests {
         //setIfAbsent,如果key不存在,添加k-v,返回true
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
+    }
+    @Test
+    public void testBlogMapper(){
+        //int i = blogMapper.addLike(4L);
+        //int i = blogMapper.addLike(4L);
+        int i = blogMapper.removeLike(4L);
+        System.out.println(i);
     }
 }
