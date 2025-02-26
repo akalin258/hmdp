@@ -49,9 +49,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         // 查询用户
         records.forEach(blog ->{
             Long userId = blog.getUserId();
+            Long blogId = blog.getId();
             User user = userService.getById(userId);
             blog.setName(user.getNickName());
             blog.setIcon(user.getIcon());
+            Boolean isCurUserLiked = stringRedisTemplate.opsForSet().isMember(BLOG_LIKED_KEY + blogId, userId.toString());
+            blog.setIsLike(isCurUserLiked);
         });
         return Result.ok(records);
     }
@@ -68,6 +71,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         User user = userService.getById(userId);
         blog.setName(user.getNickName());
         blog.setIcon(user.getIcon());
+        Boolean isCurUserLiked = stringRedisTemplate.opsForSet().isMember(BLOG_LIKED_KEY + id, userId.toString());
+        blog.setIsLike(isCurUserLiked);
         return Result.ok(blog);
     }
 
