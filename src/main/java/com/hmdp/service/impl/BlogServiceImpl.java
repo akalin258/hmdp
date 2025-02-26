@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hmdp.utils.RedisConstants.BLOG_LIKED_KEY;
 
@@ -100,5 +101,20 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             }
         }
         return Result.ok();
+    }
+
+    @Override
+    public Result queryBlogLikes(Long blogId) {
+        List<String> userIds = stringRedisTemplate.opsForSet().randomMembers(BLOG_LIKED_KEY + blogId, 5);
+        // 将 userIds 转换为 List<Long>
+        List<Long> userIdList = userIds.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        // 根据 userIds 查询用户信息（假设你有一个 userMapper 可以查询用户信息）
+        List<User> users = userService.listByIds(userIdList);
+
+        // 返回用户信息
+        return Result.ok(users);
     }
 }
