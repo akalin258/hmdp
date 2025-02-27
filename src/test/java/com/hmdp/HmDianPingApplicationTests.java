@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 @SpringBootTest
 class HmDianPingApplicationTests {
 
@@ -58,5 +62,20 @@ class HmDianPingApplicationTests {
         //int i = blogMapper.addLike(4L);
         int i = blogMapper.removeLike(4L);
         System.out.println(i);
+        //new ArrayList<>()
+    }
+
+    public void testStringBuilder(){
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        //sb1.append()
+    }
+    @Test
+    public void testPQ(){
+        PriorityQueue<Integer> q=new PriorityQueue<>(Comparator.reverseOrder());
+        q.add(3);
+        q.add(1);
+        q.add(2);
+        System.out.println(q.peek());
     }
 }
