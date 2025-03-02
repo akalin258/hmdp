@@ -7,6 +7,8 @@ import com.hmdp.service.IShopService;
 import com.hmdp.service.impl.ShopServiceImpl;
 import com.hmdp.utils.RegexUtils;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,6 +16,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 class HmDianPingApplicationTests {
@@ -30,6 +33,9 @@ class HmDianPingApplicationTests {
 
     @Autowired
     private VoucherOrderMapper voucherOrderMapper;
+
+    @Autowired
+    private RedissonClient redissonClient;
     @Test
     public void testPhone(){
         System.out.println(RegexUtils.isPhoneInvalid("111"));
@@ -65,5 +71,28 @@ class HmDianPingApplicationTests {
     public void testSql(){
         int row = voucherOrderMapper.queryByUserAndVoucher(1010L, 15L);
         System.out.println(row);
+    }
+    @Test
+    public void testRedisson() throws InterruptedException {
+        RLock lock = redissonClient.getLock("test");
+        Thread t1=new Thread(()->{
+            try {
+                lock.tryLock(10L,30L, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("t1:hi");
+        });
+        Thread t2=new Thread(()->{
+            try {
+                lock.tryLock(10L,10L,TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("t2:hi");
+        });
+        t2.start();
+        t1.start();
+        t1.join();
     }
 }
