@@ -10,8 +10,10 @@ import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -43,26 +45,36 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         //1.查询优惠券
         SeckillVoucher seckillVoucher = seckillVoucherService.getById(voucherId);
         //2.判断时间
-        if(seckillVoucher.getBeginTime().isAfter(LocalDateTime.now())){
+        if (seckillVoucher.getBeginTime().isAfter(LocalDateTime.now())) {
             return Result.fail("秒杀未开始");
         }
-        if(seckillVoucher.getEndTime().isBefore(LocalDateTime.now())){
+        if (seckillVoucher.getEndTime().isBefore(LocalDateTime.now())) {
             return Result.fail("秒杀已结束");
         }
         //3.判断库存
-        if(seckillVoucher.getStock()<0){
+        if (seckillVoucher.getStock() < 0) {
             return Result.fail("库存不足");
         }
-        //4.判断一人一单
         Long userId = UserHolder.getUser().getId();
-        int orderNum=voucherOrderMapper.queryByUserAndVoucher(userId,voucherId);
-        if(orderNum>0){
+        synchronized (userId.toString().intern()){
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+            return proxy.createVoucherOrder(voucherId);
+        }
+
+    }
+
+    @Transactional
+    public Result createVoucherOrder(Long voucherId) {
+        Long userId = UserHolder.getUser().getId();
+        //4.判断一人一单
+        int orderNum = voucherOrderMapper.queryByUserAndVoucher(userId, voucherId);
+        if (orderNum > 0) {
             return Result.fail("每位用户只能下单一次");
         }
         //5.扣减库存
         //这块是不是有问题
         int row = seckillVoucherMapper.reduceStock(voucherId);
-        if(row!=1){
+        if (row != 1) {
             return Result.fail("下单失败");
         }
         //6.创建订单
@@ -73,8 +85,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         voucherOrder.setUserId(userId);
         voucherOrder.setId(orderId);
         save(voucherOrder);
-
         return Result.ok(orderId);
     }
-
 }
