@@ -35,44 +35,46 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     @Autowired
     private RedisIdWorker redisIdWorker;
 
+    @Autowired
+    private VoucherOrderMapper voucherOrderMapper;
+
     @Override
     public Result seckillVoucher(Long voucherId) {
         //1.查询优惠券
-        SeckillVoucher voucher = seckillVoucherService.getById(voucherId);
-        //2.判断秒杀时间
-        if (voucher.getBeginTime().isAfter(LocalDateTime.now())) {
+        SeckillVoucher seckillVoucher = seckillVoucherService.getById(voucherId);
+        //2.判断时间
+        if(seckillVoucher.getBeginTime().isAfter(LocalDateTime.now())){
             return Result.fail("秒杀未开始");
         }
-        if (voucher.getEndTime().isBefore(LocalDateTime.now())) {
-            return Result.fail("秒杀已经结束");
+        if(seckillVoucher.getEndTime().isBefore(LocalDateTime.now())){
+            return Result.fail("秒杀已结束");
         }
         //3.判断库存
-        //3.1库存不足
-        if (voucher.getStock() < 0) {
+        if(seckillVoucher.getStock()<0){
             return Result.fail("库存不足");
         }
-        //确保一人一单
-        //query().eq()
-        //TODO 这块还没弄完
-        //3.2库存足够,扣减库存
-        //....
-        int rows = seckillVoucherMapper.reduceStock(voucherId);
-        if(rows<0){
-            return Result.fail("库存不足");
-        }
-
-        //4.创建订单
-        //6.创建订单
-        VoucherOrder voucherOrder = new VoucherOrder();
-        // 6.1.订单id
-        long orderId = redisIdWorker.nextId("order");
-        voucherOrder.setId(orderId);
-        // 6.2.用户id
+        //4.判断一人一单
         Long userId = UserHolder.getUser().getId();
-        voucherOrder.setUserId(userId);
-        // 6.3.代金券id
+        int orderNum=voucherOrderMapper.queryByUserAndVoucher(userId,voucherId);
+        if(orderNum>0){
+            return Result.fail("每位用户只能下单一次");
+        }
+        //5.扣减库存
+        //这块是不是有问题
+        int row = seckillVoucherMapper.reduceStock(voucherId);
+        if(row!=1){
+            return Result.fail("下单失败");
+        }
+        //6.创建订单
+        //填充voucherId,userId,订单的id
+        VoucherOrder voucherOrder = new VoucherOrder();
         voucherOrder.setVoucherId(voucherId);
+        long orderId = redisIdWorker.nextId("order");
+        voucherOrder.setUserId(userId);
+        voucherOrder.setId(orderId);
         save(voucherOrder);
+
         return Result.ok(orderId);
     }
+
 }

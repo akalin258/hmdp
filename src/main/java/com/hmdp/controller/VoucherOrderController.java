@@ -24,7 +24,7 @@ public class VoucherOrderController {
     @Autowired
     private IVoucherOrderService voucherOrderService;
 
-    @PostMapping("seckill/{id}")
+    @PostMapping("/seckill/{id}")
     public Result seckillVoucher(@PathVariable("id") Long voucherId) {
 
         //return Result.fail("功能未完成");

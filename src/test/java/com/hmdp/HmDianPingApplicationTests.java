@@ -1,6 +1,8 @@
 package com.hmdp;
 
 import cn.hutool.core.util.StrUtil;
+import com.hmdp.mapper.BlogMapper;
+import com.hmdp.mapper.VoucherOrderMapper;
 import com.hmdp.service.IShopService;
 import com.hmdp.service.impl.ShopServiceImpl;
 import com.hmdp.utils.RegexUtils;
@@ -8,6 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 @SpringBootTest
 class HmDianPingApplicationTests {
@@ -18,6 +24,12 @@ class HmDianPingApplicationTests {
     //注意,这里注入的是实现类
     @Autowired
     private ShopServiceImpl shopService;
+
+    @Autowired
+    private BlogMapper blogMapper;
+
+    @Autowired
+    private VoucherOrderMapper voucherOrderMapper;
     @Test
     public void testPhone(){
         System.out.println(RegexUtils.isPhoneInvalid("111"));
@@ -47,5 +59,11 @@ class HmDianPingApplicationTests {
         //setIfAbsent,如果key不存在,添加k-v,返回true
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
+    }
+
+    @Test
+    public void testSql(){
+        int row = voucherOrderMapper.queryByUserAndVoucher(1010L, 15L);
+        System.out.println(row);
     }
 }
