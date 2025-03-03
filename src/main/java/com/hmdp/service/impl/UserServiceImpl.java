@@ -3,6 +3,7 @@ package com.hmdp.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.dto.LoginFormDTO;
@@ -11,6 +12,7 @@ import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.RegexUtils;
+import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -90,6 +94,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.ok(token);
 
     }
+
+    @Override
+    public Result sign() {
+        // 1.获取当前登录用户
+        Long userId = UserHolder.getUser().getId();
+        // 2.获取日期
+        LocalDateTime now = LocalDateTime.now();
+        // 3.拼接key
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+        String key = USER_SIGN_KEY + userId + keySuffix;
+        // 4.获取今天是本月的第几天
+        int dayOfMonth = now.getDayOfMonth();
+        // 5.写入Redis SETBIT key offset 1
+        stringRedisTemplate.opsForValue().setBit(key, dayOfMonth - 1, true);
+        return Result.ok();
+    }
+
+    @Override
+    public Result signCount() {
+        // 1.获取当前登录用户
+        Long userId = UserHolder.getUser().getId();
+        // 2.获取日期
+        LocalDateTime now = LocalDateTime.now();
+        // 3.拼接key
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+        String key = USER_SIGN_KEY + userId + keySuffix;
+        // 4.获取今天是本月的第几天
+        int dayOfMonth = now.getDayOfMonth();
+
+        //5.从今天开始向前统计
+        //和游戏中一样,从之前到今天连续签到的日期数
+        int cnt=0;
+        for(int i=dayOfMonth;i>=1;i--){
+            Boolean isSign = stringRedisTemplate.opsForValue().getBit(key, i - 1);
+            if(BooleanUtil.isTrue(isSign)){
+                cnt++;
+            }else{
+                break;
+            }
+        }
+        return Result.ok(cnt);
+    }
+
     private User createUserWithPhone(String phone) {
         // 1.创建用户
         User user = new User();
