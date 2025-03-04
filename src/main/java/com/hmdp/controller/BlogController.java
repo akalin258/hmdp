@@ -46,9 +46,11 @@ public class BlogController {
     @PutMapping("/like/{id}")
     public Result likeBlog(@PathVariable("id") Long id) {
         // 修改点赞数量
-        blogService.update()
+        /*blogService.update()
                 .setSql("liked = liked + 1").eq("id", id).update();
-        return Result.ok();
+        return Result.ok();*/
+        //给该blog点赞
+        return blogService.likeBlog(id);
     }
 
     @GetMapping("/of/me")
@@ -64,20 +66,32 @@ public class BlogController {
     }
 
     @GetMapping("/hot")
+    //把下面这些东西放到service里面
     public Result queryHotBlog(@RequestParam(value = "current", defaultValue = "1") Integer current) {
+        return blogService.queryHotBlog(current);
+    }
+
+    @GetMapping("/{id}")
+    public Result queryBlogById(@PathVariable("id") Long id){
+        return blogService.queryBlogById(id);
+    }
+
+    //获取部分点赞的用户
+    @GetMapping("/likes/{id}")
+    public Result queryBlogLikes(@PathVariable("id") Long blogId){
+        return blogService.queryBlogLikes(blogId);
+    }
+
+    // BlogController  根据id查询博主的探店笔记
+    @GetMapping("/of/user")
+    public Result queryBlogByUserId(
+            @RequestParam(value = "current", defaultValue = "1") Integer current,
+            @RequestParam("id") Long id) {
         // 根据用户查询
         Page<Blog> page = blogService.query()
-                .orderByDesc("liked")
-                .page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+                .eq("user_id", id).page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
         // 获取当前页数据
         List<Blog> records = page.getRecords();
-        // 查询用户
-        records.forEach(blog ->{
-            Long userId = blog.getUserId();
-            User user = userService.getById(userId);
-            blog.setName(user.getNickName());
-            blog.setIcon(user.getIcon());
-        });
         return Result.ok(records);
     }
 }
