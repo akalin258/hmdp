@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,13 +106,20 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     @Override
     public Result queryBlogLikes(Long blogId) {
-        List<String> userIds = stringRedisTemplate.opsForSet().randomMembers(BLOG_LIKED_KEY + blogId, 5);
+        List<String> userIds = stringRedisTemplate.opsForSet()
+                .randomMembers(BLOG_LIKED_KEY + blogId, 5);
+        // 如果 userIds 为空，直接返回空列表
+        if (userIds == null || userIds.isEmpty()) {
+            return Result.ok(Collections.emptyList());
+        }
         // 将 userIds 转换为 List<Long>
+
         List<Long> userIdList = userIds.stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
 
         // 根据 userIds 查询用户信息（假设你有一个 userMapper 可以查询用户信息）
+
         List<User> users = userService.listByIds(userIdList);
 
         // 返回用户信息

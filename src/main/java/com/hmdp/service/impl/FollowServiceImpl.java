@@ -61,7 +61,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
             boolean isSuccess = remove(new QueryWrapper<Follow>()
                     .eq("user_id", userId).eq("follow_user_id", bloggerId));
             if(isSuccess){
-                stringRedisTemplate.opsForSet().remove(key,userId);
+                stringRedisTemplate.opsForSet().remove(key,userId.toString());
             }
         }
         return Result.ok();
