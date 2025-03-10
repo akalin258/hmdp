@@ -86,7 +86,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         Map<String,String> userMap=new HashMap<>();
         userMap.put("id",user.getId().toString());
         userMap.put("nickName",user.getNickName());
-        userMap.put("icno",user.getIcon());
+        // 修正为
+        userMap.put("icon", user.getIcon());
         stringRedisTemplate.opsForHash().putAll(key,userMap);
         //5.设置一下过期时间
         stringRedisTemplate.expire(key,LOGIN_USER_TTL, TimeUnit.MINUTES);

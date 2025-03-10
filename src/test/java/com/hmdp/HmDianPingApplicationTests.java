@@ -34,6 +34,7 @@ class HmDianPingApplicationTests {
     public void testIsNULL(){
         String shopJson="";
         System.out.println(shopJson=="");
+
     }
     @Test
     //店铺缓存预热
@@ -48,4 +49,5 @@ class HmDianPingApplicationTests {
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
     }
+
 }

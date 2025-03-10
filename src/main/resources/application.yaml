@@ -19,6 +19,18 @@ spring:
         max-idle: 10
         min-idle: 1
         time-between-eviction-runs: 10s
+  rabbitmq:
+    host: 121.43.137.22 # IP地址
+    port: 5672 # 端口号
+    username: hmdianping # 用户名
+    password: 123456 # 密码
+    virtual-host: /hmdianping
+    listener:
+      simple:
+        concurrency: 1
+        max-concurrency: 1
+        acknowledge-mode: manual
+        prefetch: 1
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
 mybatis-plus:
@@ -26,3 +38,4 @@ mybatis-plus:
 logging:
   level:
     com.hmdp: debug
+
