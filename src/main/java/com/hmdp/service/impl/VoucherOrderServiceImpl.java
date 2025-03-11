@@ -11,6 +11,7 @@ import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.UserHolder;
+import com.rabbitmq.client.Channel;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -19,15 +20,18 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,8 +102,13 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     }
 
     @RabbitListener(queues = "seckill.order.create.queue")
-    public void handleSeckillMessage(SeckillMessage message) {
-        createVoucherOrder(message.getVoucherId(), message.getUserId());
+    public void handleSeckillMessage(SeckillMessage message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
+        try {
+            createVoucherOrder(message.getVoucherId(), message.getUserId());
+            channel.basicAck(tag, false); // 手动确认
+        } catch (Exception e) {
+            channel.basicNack(tag, false, true); // 重新入队
+        }
     }
 
     @Transactional
@@ -127,7 +136,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         voucherOrder.setVoucherId(voucherId);
         long orderId = redisIdWorker.nextId("order");
         voucherOrder.setUserId(userId);
-        voucherOrder.setId(orderId);
+        voucherOrder.setId(orderId);//全局唯一id
         save(voucherOrder);
         return Result.ok(orderId);
     }
