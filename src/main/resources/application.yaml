@@ -19,18 +19,21 @@ spring:
         max-idle: 10
         min-idle: 1
         time-between-eviction-runs: 10s
+  # application.yml
   rabbitmq:
-    host: 121.43.137.22 # IP地址
-    port: 5672 # 端口号
-    username: hmdianping # 用户名
-    password: 123456 # 密码
+    host: 121.43.137.22
+    port: 5672
+    username: hmdianping
+    password: 123456
     virtual-host: /hmdianping
+    # 生产者确认
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    # 消费者配置
     listener:
       simple:
-        concurrency: 1
-        max-concurrency: 1
-        acknowledge-mode: manual
-        prefetch: 1
+        acknowledge-mode: manual # 手动ACK
+        prefetch: 100 # 每个消费者最大未确认数
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
 mybatis-plus:

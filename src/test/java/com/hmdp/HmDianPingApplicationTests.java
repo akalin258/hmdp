@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.util.List;
+
 @SpringBootTest
 class HmDianPingApplicationTests {
 
@@ -49,5 +51,11 @@ class HmDianPingApplicationTests {
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
     }
+    @Test
+    public void testApi(){
+        List<Integer> integers = List.of(1);
+        String s = new String();
+        s.length();
 
+    }
 }
