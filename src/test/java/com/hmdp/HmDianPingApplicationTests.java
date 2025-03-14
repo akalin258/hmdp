@@ -51,11 +51,5 @@ class HmDianPingApplicationTests {
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
     }
-    @Test
-    public void testApi(){
-        List<Integer> integers = List.of(1);
-        String s = new String();
-        s.length();
 
-    }
 }
