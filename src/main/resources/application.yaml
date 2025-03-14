@@ -4,10 +4,10 @@ spring:
   application:
     name: hmdp
   datasource:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      username: root
-      password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
   redis:
     host: 121.43.137.22
     port: 6379
@@ -34,11 +34,22 @@ spring:
       simple:
         acknowledge-mode: manual # 手动ACK
         prefetch: 100 # 每个消费者最大未确认数
+
+
+
+
+
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
 mybatis-plus:
   type-aliases-package: com.hmdp.entity # 别名扫描包
 logging:
   level:
-    com.hmdp: debug
+    top.javatool.canal: DEBUG
+    org.springframework.context: DEBUG
 
+
+
+canal:
+  server: 127.0.0.1:11111
+  destination: example

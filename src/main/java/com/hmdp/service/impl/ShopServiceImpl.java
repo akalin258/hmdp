@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.hmdp.dto.Result;
 import com.hmdp.entity.Shop;
 import com.hmdp.mapper.ShopMapper;
@@ -13,6 +14,7 @@ import com.hmdp.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisData;
 import com.hmdp.utils.SystemConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
@@ -23,6 +25,7 @@ import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -42,16 +45,45 @@ import static java.lang.Thread.sleep;
  * @since 2021-12-22
  */
 @Service
+@Slf4j
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    private Cache<String,Object> caffeineCache;
+
     private ExecutorService CACHE_REBUILD_EXECUTOR= Executors.newFixedThreadPool(10);
     @Override
     public Result queryShopById(Long id) {
+
+        //1.从Caffeine中查询数据
+        Object o = caffeineCache.getIfPresent(CACHE_SHOP_KEY + id);
+        if(Objects.nonNull(o)){
+
+
+            log.info("从Caffeine中查询到数据...");
+            return Result.ok( o);
+        }
+
         //用逻辑过期解决缓存击穿
         Shop shop = queryWithLogicalExpire(id);
+        if(shop != null){
+
+
+            log.info("从Redis中查到数据");
+            caffeineCache.put(CACHE_SHOP_KEY+id,shop);
+        }
+
+
+        if(shop == null){
+
+
+            return Result.fail("店铺不存在！");
+        }
+
+        //7.返回数据
         return Result.ok(shop);
     }
     //缓存空对象,解决缓存穿透
@@ -150,10 +182,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         }
         //1.更新数据库
         updateById(shop);
-        //2.删除缓存
+        //现在有canal了,不用手动更新了
+        /*//2.删除缓存
         //这里从shop取id,前面得判空一下
         String key=CACHE_SHOP_KEY+id;
-        stringRedisTemplate.delete(key);
+        stringRedisTemplate.delete(key);*/
         return Result.ok();
     }
 
