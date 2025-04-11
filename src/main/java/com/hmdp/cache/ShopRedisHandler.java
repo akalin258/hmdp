@@ -1,3 +1,4 @@
+/*
 package com.hmdp.cache;
 
 
@@ -89,3 +90,4 @@ public class ShopRedisHandler implements InitializingBean {
         redisTemplate.delete(key + id);
     }
 }
+*/

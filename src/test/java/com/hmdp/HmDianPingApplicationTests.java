@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
+import java.util.Scanner;
 
 @SpringBootTest
 class HmDianPingApplicationTests {
@@ -50,6 +51,9 @@ class HmDianPingApplicationTests {
         //setIfAbsent,如果key不存在,添加k-v,返回true
         //第一次试一个不存在的返回true
         //再运行这个函数,返回false
+        /*String s = new String();
+        s.length()*/
     }
+
 
 }

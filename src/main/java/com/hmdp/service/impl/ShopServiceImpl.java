@@ -51,38 +51,15 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Resource
-    private Cache<String,Object> caffeineCache;
 
     private ExecutorService CACHE_REBUILD_EXECUTOR= Executors.newFixedThreadPool(10);
     @Override
     public Result queryShopById(Long id) {
-
-        //1.从Caffeine中查询数据
-        Object o = caffeineCache.getIfPresent(CACHE_SHOP_KEY + id);
-        if(Objects.nonNull(o)){
-
-
-            log.info("从Caffeine中查询到数据...");
-            return Result.ok( o);
-        }
-
         //用逻辑过期解决缓存击穿
         Shop shop = queryWithLogicalExpire(id);
-        if(shop != null){
-
-
-            log.info("从Redis中查到数据");
-            caffeineCache.put(CACHE_SHOP_KEY+id,shop);
-        }
-
-
         if(shop == null){
-
-
             return Result.fail("店铺不存在！");
         }
-
         //7.返回数据
         return Result.ok(shop);
     }
@@ -182,11 +159,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         }
         //1.更新数据库
         updateById(shop);
-        //现在有canal了,不用手动更新了
-        /*//2.删除缓存
+        //2.删除缓存
         //这里从shop取id,前面得判空一下
         String key=CACHE_SHOP_KEY+id;
-        stringRedisTemplate.delete(key);*/
+        stringRedisTemplate.delete(key);
         return Result.ok();
     }
 

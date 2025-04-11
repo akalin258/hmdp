@@ -34,7 +34,11 @@ spring:
       simple:
         acknowledge-mode: manual # 手动ACK
         prefetch: 100 # 每个消费者最大未确认数
-
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8090 # 改成你的 Sentinel 控制台地址
+      eager: true # 强制立即初始化（部分版本需要）
 
 
 
@@ -53,3 +57,6 @@ logging:
 canal:
   server: 127.0.0.1:11111
   destination: example
+
+
+

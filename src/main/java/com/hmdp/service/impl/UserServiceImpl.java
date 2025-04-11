@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
+import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
@@ -73,6 +74,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(cacheCode==null || !code.equals(cacheCode)){
             return Result.fail("验证码错误");
         }
+        //登录成功之后把验证码删除
+        stringRedisTemplate.delete(LOGIN_CODE_KEY + phone);
         //3.查询这个用户是否存在,没有的话创建
         User user = query().eq("phone", phone).one();
         if(user==null){
@@ -89,6 +92,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         stringRedisTemplate.opsForHash().putAll(key,userMap);
         //5.设置一下过期时间
         stringRedisTemplate.expire(key,LOGIN_USER_TTL, TimeUnit.MINUTES);
+
         //6.返回一下token
         return Result.ok(token);
 

@@ -28,16 +28,16 @@ public class VoucherOrderController {
     private IVoucherOrderService voucherOrderService;
 
     @PostMapping("seckill/{id}")
-    //@SentinelResource(value = "seckill",blockHandler = "handleBlock",fallback = "handleFallback")
+    @SentinelResource(value = "seckill",blockHandler = "handleBlock",fallback = "handleFallback")
     public Result seckillVoucher(@PathVariable("id") Long voucherId) {
-        /*long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Result result = voucherOrderService.seckillVoucher(voucherId);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         log.info("秒杀接口耗时：{}ms",duration);
 //        return voucherOrderService.seckillVoucher(voucherId);
-        return result;*/
-        return voucherOrderService.seckillVoucher(voucherId);
+        return result;
+        //return voucherOrderService.seckillVoucher(voucherId);
     }
 
 

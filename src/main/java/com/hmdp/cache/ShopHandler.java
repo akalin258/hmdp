@@ -1,3 +1,4 @@
+/*
 package com.hmdp.cache;
 
 
@@ -55,3 +56,4 @@ public class ShopHandler implements EntryHandler<Shop> {
 }
 
 
+*/

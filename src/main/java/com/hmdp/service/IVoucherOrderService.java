@@ -19,7 +19,7 @@ public interface IVoucherOrderService extends IService<VoucherOrder> {
     //未引入mq时的方法
     //Result createVoucherOrder(Long voucherId);
 
-    Result createVoucherOrder(Long voucherId,Long userID);
+
 
     //加一个创建订单
     // 创建订单（异步消息消费入口）
