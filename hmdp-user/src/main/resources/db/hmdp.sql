@@ -1283,6 +1283,21 @@ CREATE TABLE `tb_voucher_order`  (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+create table tb_admin
+(
+    id          bigint auto_increment
+        primary key,
+    username    varchar(50)       not null,
+    password    varchar(128)      not null,
+    name        varchar(50)       null,
+    authorities varchar(255)      null,
+    status      tinyint default 1 null,
+    create_time datetime          null,
+    update_time datetime          null,
+    constraint username
+        unique (username)
+);
 
+insert into tb_admin (username,password) values ('admin','admin')
 
 
