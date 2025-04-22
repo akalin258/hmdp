@@ -33,17 +33,17 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-    /*@Autowired
+    @Autowired
     private IUserService userService;
 
-    *//**
+    /**
      * 获取用户列表
      * @param current 当前页
      * @param size 每页数量
      * @param nickName 用户昵称
      * @param phone 手机号
      * @return 分页用户列表
-     *//*
+     */
     @GetMapping("/list")
     public Result getUserList(
             @RequestParam(value = "current", defaultValue = "1") Integer current,
@@ -51,15 +51,17 @@ public class UserController {
             @RequestParam(value = "nickName", required = false) String nickName,
             @RequestParam(value = "phone", required = false) String phone
     ) {
+        //分页查询，核心sql
+        //select ... from tb_user limit #{current} offset #{size} ....
         Page<User> userPage = userService.queryUserByPage(current, size, nickName, phone);
         return Result.ok(userPage);
     }
 
-    *//**
+    /**
      * 获取用户详情
      * @param id 用户ID
      * @return 用户详情
-     *//*
+     */
     @GetMapping("/{id}")
     public Result getUserDetail(@PathVariable("id") Long id) {
         User user = userService.getById(id);
@@ -69,12 +71,12 @@ public class UserController {
         return Result.ok(user);
     }
 
-    *//**
+    /**
      * 更新用户状态
      * @param params 包含id和status的参数
      * @return 操作结果
-     *//*
-    @PutMapping("/status")
+     */
+    /*@PutMapping("/status")
     public Result updateUserStatus(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
         Boolean status = (Boolean) params.get("status");
@@ -84,14 +86,14 @@ public class UserController {
             return Result.fail("更新用户状态失败");
         }
         return Result.ok("操作成功");
-    }
+    }*/
 
-    *//**
+    /**
      * 重置用户密码
      * @param id 用户ID
      * @return 操作结果
-     *//*
-    @PutMapping("/reset-password/{id}")
+     */
+    /*@PutMapping("/reset-password/{id}")
     public Result resetUserPassword(@PathVariable("id") Long id) {
         boolean success = userService.resetUserPassword(id);
         if (!success) {

@@ -1,7 +1,9 @@
 package com.hmdp.admin.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.admin.dto.Result;
+import com.hmdp.admin.entity.Shop;
 import com.hmdp.admin.entity.Voucher;
 
 import com.hmdp.admin.service.IVoucherService;
@@ -54,5 +56,19 @@ public class VoucherController {
     @GetMapping("/list/{shopId}")
     public Result queryVoucherOfShop(@PathVariable("shopId") Long shopId) {
        return voucherService.queryVoucherOfShop(shopId);
+    }
+
+
+    @GetMapping("/list")
+    public Result getUserList(
+            @RequestParam(value = "current", defaultValue = "1") Integer current,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "type", required = false) Integer type
+    ) {
+        //分页查询，核心sql
+        //select ... from tb_user limit #{current} offset #{size}
+        Page<Voucher> voucher = voucherService.queryVoucherByPage(current, size, title, type);
+        return Result.ok(voucher);
     }
 }

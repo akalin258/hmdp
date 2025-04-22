@@ -10,6 +10,7 @@ import com.hmdp.admin.service.IBlogService;
 import com.hmdp.admin.service.IUserService;
 import com.hmdp.admin.utils.SystemConstants;
 import com.hmdp.admin.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,6 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/blog")
+@Slf4j
 public class BlogController {
 
     @Resource
@@ -93,5 +95,24 @@ public class BlogController {
         // 获取当前页数据
         List<Blog> records = page.getRecords();
         return Result.ok(records);
+    }
+
+    /**
+     * 分页查询博客列表（用于后台管理）
+     * @param current 当前页
+     * @param size 每页数量
+     * @param title 标题关键词
+     * @return 博客分页列表
+     */
+    @GetMapping("/list")
+    public Result getBlogList(
+            @RequestParam(value = "current", defaultValue = "1") Integer current,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "title", required = false) String title
+    ) {
+        log.info("获取博客列表: current={}, size={}, title={}", current, size, title);
+        // 只传null作为status参数
+        Page<Blog> blogPage = blogService.queryBlogByPage(current, size, title, null);
+        return Result.ok(blogPage);
     }
 }

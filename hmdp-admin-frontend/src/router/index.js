@@ -31,6 +31,12 @@ const routes = [
         meta: { title: '用户管理', icon: 'User' }
       },
       {
+        path: 'blog',
+        name: 'Blog',
+        component: () => import('../views/blog/index.vue'),
+        meta: { title: '探店笔记', icon: 'Document' }
+      },
+      {
         path: 'voucher',
         name: 'Voucher',
         component: () => import('../views/voucher/index.vue'),

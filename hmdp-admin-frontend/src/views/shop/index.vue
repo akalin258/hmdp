@@ -104,6 +104,12 @@
         <el-form-item label="店铺图片" prop="images">
           <el-input v-model="shopForm.images" placeholder="图片URL" />
         </el-form-item>
+        <el-form-item label="经度" prop="x">
+          <el-input-number v-model="shopForm.x" :precision="6" :step="0.000001" :min="0" />
+        </el-form-item>
+        <el-form-item label="纬度" prop="y">
+          <el-input-number v-model="shopForm.y" :precision="6" :step="0.000001" :min="0" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -143,14 +149,18 @@ const shopForm = reactive({
   area: '',
   address: '',
   avgPrice: 0,
-  images: ''
+  images: '',
+  x: null,
+  y: null
 })
 
 // 表单验证规则
 const shopRules = {
   name: [{ required: true, message: '请输入店铺名称', trigger: 'blur' }],
   typeId: [{ required: true, message: '请选择店铺类型', trigger: 'change' }],
-  address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
+  address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
+  x: [{ required: true, message: '请输入经度', trigger: 'blur' }],
+  y: [{ required: true, message: '请输入纬度', trigger: 'blur' }]
 }
 
 // 获取店铺列表

@@ -1,7 +1,11 @@
 package com.hmdp.admin.service.impl;
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.admin.dto.Result;
+import com.hmdp.admin.entity.Shop;
 import com.hmdp.admin.entity.Voucher;
 import com.hmdp.admin.mapper.VoucherMapper;
 import com.hmdp.admin.entity.SeckillVoucher;
@@ -58,6 +62,20 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
 
         //后续下单优化,把一些判断写入到redis了,所以要把一些信息存到redis里
         stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY+voucher.getId(),voucher.getStock().toString());
+
+    }
+
+    @Override
+    public Page<Voucher> queryVoucherByPage(Integer current, Integer size, String title, Integer type) {
+        Page<Voucher> page = new Page<>(current, size);
+        LambdaQueryWrapper<Voucher> queryWrapper = new LambdaQueryWrapper<>();
+        if(StrUtil.isNotBlank(title)){
+            queryWrapper.like(Voucher::getTitle,title);
+        }
+        if(type!=null){
+            queryWrapper.eq(Voucher::getType,type);
+        }
+        return page(page,queryWrapper);
 
     }
 }

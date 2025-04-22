@@ -22,6 +22,10 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item index="/blog">
+          <el-icon><Document /></el-icon>
+          <span>探店笔记</span>
+        </el-menu-item>
         <el-menu-item index="/voucher">
           <el-icon><Ticket /></el-icon>
           <span>优惠券管理</span>
@@ -58,7 +62,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { DataLine, Shop, User, Ticket, ArrowDown } from '@element-plus/icons-vue'
+import { DataLine, Shop, User, Ticket, ArrowDown, Document } from '@element-plus/icons-vue'
 import { logout as logoutApi } from '@/api/auth'
 
 const route = useRoute()
@@ -72,7 +76,7 @@ const logout = async () => {
   } catch (error) {
     console.error('登出失败', error)
   }
-  localStorage.removeItem('adminToken')
+  localStorage.removeItem('isLoggedIn')
   router.push('/login')
 }
 </script>

@@ -1,8 +1,10 @@
 package com.hmdp.admin.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.admin.dto.Result;
 import com.hmdp.admin.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hmdp.admin.entity.User;
 
 /**
  * <p>
@@ -14,9 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IShopService extends IService<Shop> {
 
-    Result queryShopById(Long id);
 
-    Result updateShop(Shop shop);
 
-    Result queryShopByType(Integer typeId, Integer current, Double x, Double y);
+    Page<Shop> queryShopByPage(Integer current, Integer size, String name, Integer typeId);
 }

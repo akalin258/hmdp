@@ -1,6 +1,8 @@
 package com.hmdp.admin.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.admin.dto.Result;
 import com.hmdp.admin.entity.Blog;
@@ -126,5 +128,25 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
         // 返回用户信息
         return Result.ok(users);
+    }
+
+    @Override
+    public Page<Blog> queryBlogByPage(Integer current, Integer size, String title, String status) {
+        // 创建分页对象
+        Page<Blog> page = new Page<>(current, size);
+        
+        // 构建查询条件
+        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        
+        // 添加标题模糊查询条件
+        if (StrUtil.isNotBlank(title)) {
+            queryWrapper.like(Blog::getTitle, title);
+        }
+        
+        // 按创建时间降序排序
+        queryWrapper.orderByDesc(Blog::getCreateTime);
+        
+        // 执行查询
+        return page(page, queryWrapper);
     }
 }

@@ -46,7 +46,7 @@ export function deleteShop(id) {
 // 获取店铺类型列表
 export function getShopTypeList() {
   return request({
-    url: '/shop/type/list',
+    url: '/shop-type/list',
     method: 'get'
   })
 } 

@@ -1,5 +1,6 @@
 package com.hmdp.admin.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.admin.dto.Result;
 import com.hmdp.admin.entity.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -21,4 +22,14 @@ public interface IBlogService extends IService<Blog> {
     Result likeBlog(Long id);
 
     Result queryBlogLikes(Long blogId);
+    
+    /**
+     * 分页查询博客
+     * @param current 当前页
+     * @param size 每页数量
+     * @param title 标题关键词
+     * @param status 状态
+     * @return 博客分页结果
+     */
+    Page<Blog> queryBlogByPage(Integer current, Integer size, String title, String status);
 }
