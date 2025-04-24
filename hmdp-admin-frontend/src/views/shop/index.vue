@@ -45,7 +45,7 @@
       </el-table-column>
       <el-table-column prop="score" label="评分" width="100">
         <template #default="{ row }">
-          <el-rate v-model="row.score" disabled text-color="#ff9900" />
+          <el-rate v-model="row.displayScore" disabled text-color="#ff9900" />
         </template>
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
@@ -102,13 +102,28 @@
           <el-input-number v-model="shopForm.avgPrice" :min="0" />
         </el-form-item>
         <el-form-item label="店铺图片" prop="images">
-          <el-input v-model="shopForm.images" placeholder="图片URL" />
+          <el-input v-model="shopForm.images" placeholder="图片URL（可选）" />
         </el-form-item>
         <el-form-item label="经度" prop="x">
           <el-input-number v-model="shopForm.x" :precision="6" :step="0.000001" :min="0" />
         </el-form-item>
         <el-form-item label="纬度" prop="y">
           <el-input-number v-model="shopForm.y" :precision="6" :step="0.000001" :min="0" />
+        </el-form-item>
+        <el-form-item label="销量" prop="sold">
+          <el-input-number v-model="shopForm.sold" :min="0" :step="1" />
+        </el-form-item>
+        <el-form-item label="评论数" prop="comments">
+          <el-input-number v-model="shopForm.comments" :min="0" :step="1" />
+        </el-form-item>
+        <el-form-item label="评分" prop="score">
+          <el-rate 
+            v-model="shopForm.displayScore" 
+            :max="5" 
+            :texts="['1分', '2分', '3分', '4分', '5分']" 
+            show-text 
+            @change="handleScoreChange"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -151,7 +166,11 @@ const shopForm = reactive({
   avgPrice: 0,
   images: '',
   x: null,
-  y: null
+  y: null,
+  sold: 0,
+  comments: 0,
+  score: 50,       // 实际存储的得分值 (10-50)
+  displayScore: 5   // 显示给用户的得分值 (1-5)
 })
 
 // 表单验证规则
@@ -170,7 +189,8 @@ const getList = async () => {
     const res = await getShopList(listQuery)
     list.value = res.data.records.map(shop => ({
       ...shop,
-      typeName: shopTypes.value.find(type => type.id === shop.typeId)?.name || '未知'
+      typeName: shopTypes.value.find(type => type.id === shop.typeId)?.name || '未知',
+      displayScore: shop.score / 10 // 将数据库中的评分转换为1-5分制显示
     }))
     total.value = res.data.total
   } catch (error) {
@@ -211,7 +231,15 @@ const handleCurrentChange = (val) => {
 const handleAdd = () => {
   dialogType.value = 'add'
   Object.keys(shopForm).forEach(key => {
-    shopForm[key] = key === 'avgPrice' ? 0 : ''
+    if (key === 'avgPrice' || key === 'sold' || key === 'comments') {
+      shopForm[key] = 0;
+    } else if (key === 'score') {
+      shopForm[key] = 50; // 默认5分 (5 * 10)
+    } else if (key === 'displayScore') {
+      shopForm[key] = 5; // 显示5分
+    } else {
+      shopForm[key] = '';
+    }
   })
   dialogVisible.value = true
 }
@@ -221,7 +249,10 @@ const handleEdit = async (row) => {
   dialogType.value = 'edit'
   try {
     const res = await getShopDetail(row.id)
-    Object.assign(shopForm, res.data)
+    const shopData = res.data;
+    // 将数据库中的score转换为前端显示的评分(1-5分)
+    shopData.displayScore = shopData.score / 10;
+    Object.assign(shopForm, shopData)
     dialogVisible.value = true
   } catch (error) {
     console.error('获取店铺详情失败', error)
@@ -252,11 +283,15 @@ const submitShopForm = async () => {
   try {
     await shopFormRef.value.validate()
     
+    // 删除displayScore字段，服务器端不需要
+    const shopData = { ...shopForm };
+    delete shopData.displayScore;
+    
     if (dialogType.value === 'add') {
-      await addShop(shopForm)
+      await addShop(shopData)
       ElMessage.success('添加成功')
     } else {
-      await updateShop(shopForm)
+      await updateShop(shopData)
       ElMessage.success('更新成功')
     }
     
@@ -265,6 +300,11 @@ const submitShopForm = async () => {
   } catch (error) {
     console.error('提交表单失败', error)
   }
+}
+
+// 评分转换 (界面显示1-5分，数据库存储10-50)
+const handleScoreChange = (value) => {
+  shopForm.score = value * 10;
 }
 
 onMounted(() => {

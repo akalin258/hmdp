@@ -52,10 +52,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Override
     public Result queryShopById(Long id) {
         //用逻辑过期解决缓存击穿
-        Shop shop = queryWithLogicalExpire(id);
+        /*Shop shop = queryWithLogicalExpire(id);
         if(shop == null){
             return Result.fail("店铺不存在！");
-        }
+        }*/
+        Shop shop = handleShopCachePenetration(id);
         //7.返回数据
         return Result.ok(shop);
     }
@@ -71,7 +72,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return shop;
         }
         //2.2,判断一下是否是空对象""
-        if(shopJson.equals("")){
+        if(shopJson != null && shopJson.equals("")){
             return null;
         }
         //3.redis里面没有,去数据库查
