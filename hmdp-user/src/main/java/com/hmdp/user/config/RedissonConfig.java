@@ -14,7 +14,7 @@ public class RedissonConfig {
         Config config = new Config();
         config.useSingleServer()
                 .setAddress("redis://121.43.137.22:6379")
-                .setPassword("0407bilibili");
+                .setPassword("root");
         return Redisson.create(config);
     }
 }
