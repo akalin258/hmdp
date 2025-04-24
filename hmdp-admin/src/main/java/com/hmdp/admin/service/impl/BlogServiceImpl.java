@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.admin.dto.Result;
 import com.hmdp.admin.entity.Blog;
 import com.hmdp.admin.entity.User;
+import com.hmdp.admin.entity.BlogComments;
 import com.hmdp.admin.mapper.BlogMapper;
 import com.hmdp.admin.service.IBlogService;
 import com.hmdp.admin.service.IUserService;
+import com.hmdp.admin.service.IBlogCommentsService;
 import com.hmdp.admin.utils.SystemConstants;
 import com.hmdp.admin.utils.UserHolder;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -44,6 +46,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     @Autowired
     private BlogMapper blogMapper;
+    
+    @Autowired
+    private IBlogCommentsService blogCommentsService;
+
     @Override
     public Result queryHotBlog(Integer current) {
         // 根据用户查询
@@ -131,7 +137,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     }
 
     @Override
-    public Page<Blog> queryBlogByPage(Integer current, Integer size, String title, String status) {
+    public Page<Blog> queryBlogByPage(Integer current, Integer size, String title, String status, Long shopId, String orderBy, String order) {
         // 创建分页对象
         Page<Blog> page = new Page<>(current, size);
         
@@ -143,10 +149,62 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             queryWrapper.like(Blog::getTitle, title);
         }
         
-        // 按创建时间降序排序
-        queryWrapper.orderByDesc(Blog::getCreateTime);
+        // 添加店铺ID筛选条件
+        if (shopId != null) {
+            queryWrapper.eq(Blog::getShopId, shopId);
+        }
+        
+        // 处理排序
+        if (StrUtil.isNotBlank(orderBy)) {
+            // 判断排序字段是否合法
+            boolean isAsc = "asc".equalsIgnoreCase(order);
+            
+            // 根据不同的排序字段构建不同的排序条件
+            switch (orderBy) {
+                case "liked":
+                    queryWrapper.orderBy(true, isAsc, Blog::getLiked);
+                    break;
+                case "comments":
+                    queryWrapper.orderBy(true, isAsc, Blog::getComments);
+                    break;
+                case "createTime":
+                    queryWrapper.orderBy(true, isAsc, Blog::getCreateTime);
+                    break;
+                default:
+                    // 默认按创建时间降序
+                    queryWrapper.orderByDesc(Blog::getCreateTime);
+            }
+        } else {
+            // 默认按创建时间降序
+            queryWrapper.orderByDesc(Blog::getCreateTime);
+        }
         
         // 执行查询
         return page(page, queryWrapper);
+    }
+
+    @Override
+    public boolean removeBlog(Long id) {
+        // 1. 查询博客是否存在
+        Blog blog = getById(id);
+        if (blog == null) {
+            return false;
+        }
+        
+        // 2. 删除博客评论
+        blogCommentsService.remove(new LambdaQueryWrapper<BlogComments>()
+                .eq(BlogComments::getBlogId, id));
+        
+        // 3. 删除博客
+        boolean success = removeById(id);
+        
+        // 4. 如果删除成功，还需要处理相关的点赞数据
+        if (success) {
+            // 4.1 删除Redis中的点赞数据
+            String likeKey = BLOG_LIKED_KEY + id;
+            stringRedisTemplate.delete(likeKey);
+        }
+        
+        return success;
     }
 }
