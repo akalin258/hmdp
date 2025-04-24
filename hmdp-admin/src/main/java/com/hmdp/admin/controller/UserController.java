@@ -93,14 +93,14 @@ public class UserController {
      * @param id 用户ID
      * @return 操作结果
      */
-    /*@PutMapping("/reset-password/{id}")
+    @PutMapping("/reset-password/{id}")
     public Result resetUserPassword(@PathVariable("id") Long id) {
         boolean success = userService.resetUserPassword(id);
         if (!success) {
             return Result.fail("重置密码失败");
         }
         return Result.ok("密码重置成功");
-    }*/
+    }
 
 
 

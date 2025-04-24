@@ -31,26 +31,17 @@
       <el-table-column prop="phone" label="手机号" width="120" />
       <el-table-column prop="icon" label="头像" width="100">
         <template #default="{ row }">
-          <el-avatar :src="row.icon || '/default-avatar.png'" />
+          <el-avatar 
+            :src="row.icon ? formatImageUrl(row.icon) : '/default-avatar.png'" 
+            @error="() => true"
+          >
+            <el-icon><User /></el-icon>
+          </el-avatar>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="注册时间" width="180" />
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
-          <el-tag :type="row.status ? 'success' : 'danger'">
-            {{ row.status ? '正常' : '禁用' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="200" fixed="right">
-        <template #default="{ row }">
-          <el-button 
-            :type="row.status ? 'danger' : 'success'" 
-            size="small" 
-            @click="handleStatusChange(row)"
-          >
-            {{ row.status ? '禁用' : '启用' }}
-          </el-button>
           <el-button 
             type="warning" 
             size="small" 
@@ -78,7 +69,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, updateUserStatus, resetUserPassword } from '@/api/user'
+import { getUserList, resetUserPassword } from '@/api/user'
+import { NGINX_URL } from '@/utils/config'
+import { User } from '@element-plus/icons-vue'
 
 // 用户列表数据
 const list = ref([])
@@ -92,6 +85,19 @@ const listQuery = reactive({
   nickName: '',
   phone: ''
 })
+
+// 格式化图片URL
+const formatImageUrl = (url) => {
+  if (!url) return ''
+  
+  // 如果图片URL已经是完整URL（以http开头），则直接返回
+  if (url.startsWith('http')) {
+    return url
+  }
+  
+  // 使用配置文件中定义的Nginx URL
+  return `${NGINX_URL}${url}`
+}
 
 // 获取用户列表
 const getList = async () => {
@@ -124,24 +130,6 @@ const handleCurrentChange = (val) => {
   getList()
 }
 
-// 更改用户状态
-const handleStatusChange = (row) => {
-  const statusText = row.status ? '禁用' : '启用'
-  ElMessageBox.confirm(`确认${statusText}用户 ${row.nickName} 吗?`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    try {
-      await updateUserStatus(row.id, !row.status)
-      ElMessage.success(`${statusText}成功`)
-      getList()
-    } catch (error) {
-      console.error(`${statusText}用户失败`, error)
-    }
-  }).catch(() => {})
-}
-
 // 重置用户密码
 const handleResetPassword = (row) => {
   ElMessageBox.confirm(`确认重置用户 ${row.nickName} 的密码吗?`, '提示', {
@@ -151,7 +139,7 @@ const handleResetPassword = (row) => {
   }).then(async () => {
     try {
       await resetUserPassword(row.id)
-      ElMessage.success('密码重置成功')
+      ElMessage.success('密码重置成功，新密码为：123456')
     } catch (error) {
       console.error('重置密码失败', error)
     }

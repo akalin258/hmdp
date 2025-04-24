@@ -18,5 +18,15 @@ import javax.servlet.http.HttpSession;
  */
 public interface IUserService extends IService<User> {
 
+    /**
+     * 分页查询用户
+     */
     Page<User> queryUserByPage(Integer current, Integer size, String nickName, String phone);
+    
+    /**
+     * 重置用户密码
+     * @param id 用户ID
+     * @return 是否重置成功
+     */
+    boolean resetUserPassword(Long id);
 }

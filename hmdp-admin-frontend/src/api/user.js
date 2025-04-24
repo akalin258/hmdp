@@ -17,18 +17,6 @@ export function getUserDetail(id) {
   })
 }
 
-// 更新用户状态（启用/禁用）
-export function updateUserStatus(id, status) {
-  return request({
-    url: `/user/status`,
-    method: 'put',
-    data: {
-      id,
-      status
-    }
-  })
-}
-
 // 重置用户密码
 export function resetUserPassword(id) {
   return request({

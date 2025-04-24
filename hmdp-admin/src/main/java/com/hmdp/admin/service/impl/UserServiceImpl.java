@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpSession;
 
@@ -69,5 +70,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         
         // 执行查询
         return page(page, queryWrapper);
+    }
+    
+    @Override
+    public boolean resetUserPassword(Long id) {
+        // 查询用户是否存在
+        User user = getById(id);
+        if (user == null) {
+            return false;
+        }
+        
+        // 设置新密码为123456的MD5值
+        String defaultPassword = "123456";
+        String encryptedPassword = DigestUtils.md5DigestAsHex(defaultPassword.getBytes());
+        
+        // 更新用户密码
+        user.setPassword(encryptedPassword);
+        
+        // 保存到数据库
+        return updateById(user);
     }
 }
